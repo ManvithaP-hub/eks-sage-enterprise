@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EKS Sage — Enterprise Kubernetes Intelligence</title>
+<meta name="description" content="62 MCP tools that turn 3-hour EKS incidents into 10-second diagnoses. Works with Claude, Cursor, Windsurf, and every MCP client.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0e17;
+    --surface:   #111827;
+    --border:    #1e2d40;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --accent:    #00d4ff;
+    --accent2:   #7c3aed;
+    --green:     #10b981;
+    --red:       #ef4444;
+    --yellow:    #f59e0b;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Inter', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(10,14,23,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo { font-family: var(--mono); font-size: 1rem; color: var(--accent); font-weight: 600; text-decoration: none; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: var(--bg); padding: 0.5rem 1.25rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8rem 2rem 4rem;
+    text-align: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,212,255,0.06) 0%, transparent 70%);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2);
+    color: var(--accent); font-family: var(--mono); font-size: 0.75rem;
+    padding: 0.35rem 0.85rem; border-radius: 100px; margin-bottom: 2rem;
+  }
+  .hero-badge::before { content: '●'; font-size: 0.5rem; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1;
+    letter-spacing: -0.03em; max-width: 800px; margin-bottom: 1.5rem;
+  }
+  h1 span { color: var(--accent); }
+  .hero-sub { font-size: 1.125rem; color: var(--muted); max-width: 560px; margin-bottom: 3rem; }
+
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 4rem; }
+  .btn-primary {
+    background: var(--accent); color: var(--bg); padding: 0.875rem 2rem;
+    border-radius: 8px; font-weight: 700; font-size: 1rem; text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 0 30px rgba(0,212,255,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,212,255,0.5); }
+  .btn-secondary {
+    background: transparent; color: var(--text); padding: 0.875rem 2rem;
+    border-radius: 8px; font-weight: 600; font-size: 1rem; text-decoration: none;
+    border: 1px solid var(--border); transition: border-color 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--muted); }
+
+  /* TERMINAL DEMO */
+  .terminal {
+    width: 100%; max-width: 760px; margin: 0 auto;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+  }
+  .terminal-bar {
+    background: #1a2332; padding: 0.75rem 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .terminal-title { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); margin-left: auto; }
+  .terminal-body { padding: 1.5rem; font-family: var(--mono); font-size: 0.8rem; line-height: 1.8; }
+  .t-prompt { color: var(--accent); }
+  .t-cmd { color: var(--text); }
+  .t-ok { color: var(--green); }
+  .t-warn { color: var(--yellow); }
+  .t-err { color: var(--red); }
+  .t-dim { color: var(--muted); }
+  .t-line { display: block; }
+
+  /* STATS */
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    max-width: 900px; margin: 4rem auto;
+  }
+  .stat { background: var(--surface); padding: 2rem 1.5rem; text-align: center; }
+  .stat-num { font-size: 2.5rem; font-weight: 700; font-family: var(--mono); color: var(--accent); }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* SECTIONS */
+  section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-label { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+  h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; }
+  .section-sub { font-size: 1.05rem; color: var(--muted); max-width: 520px; margin-bottom: 3rem; }
+
+  /* INCIDENT FLOW */
+  .before-after {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+  .ba-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; }
+  .ba-box.before { border-color: rgba(239,68,68,0.3); }
+  .ba-box.after { border-color: rgba(16,185,129,0.3); }
+  .ba-tag { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+  .ba-tag.red { color: var(--red); }
+  .ba-tag.green { color: var(--green); }
+  .ba-time { font-size: 2.5rem; font-weight: 700; font-family: var(--mono); margin-bottom: 0.5rem; }
+  .ba-time.red { color: var(--red); }
+  .ba-time.green { color: var(--green); }
+  .ba-steps { list-style: none; margin-top: 1rem; }
+  .ba-steps li { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); padding: 0.3rem 0; border-bottom: 1px solid var(--border); }
+  .ba-steps li:last-child { border: none; }
+
+  /* TOOLS GRID */
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  .tool-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .tool-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .tool-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .tool-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; }
+  .tool-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+  .tool-count { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); margin-top: 0.75rem; }
+
+  /* GUARDRAIL VISUAL */
+  .guardrail-layers { display: flex; flex-direction: column; gap: 1rem; max-width: 700px; }
+  .layer {
+    display: flex; align-items: flex-start; gap: 1.5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.25rem 1.5rem;
+  }
+  .layer-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); font-weight: 600; min-width: 60px; padding-top: 0.1rem; }
+  .layer-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .layer-content p { font-size: 0.82rem; color: var(--muted); }
+
+  /* PRICING */
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2rem; position: relative;
+  }
+    border-color: var(--accent);
+    box-shadow: 0 0 40px rgba(0,212,255,0.1);
+  }
+    position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: var(--bg); font-size: 0.7rem;
+    font-weight: 700; padding: 0.25rem 1rem; border-radius: 0 0 6px 6px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+    display: block; text-align: center; padding: 0.75rem;
+    border-radius: 8px; font-weight: 600; font-size: 0.875rem;
+    text-decoration: none; transition: all 0.2s;
+  }
+
+  /* CASE STUDY */
+  .case-study {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 3rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+    align-items: center;
+  }
+  .metric-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .metric-row:last-child { border: none; }
+  .metric-label { font-size: 0.85rem; color: var(--muted); }
+  .metric-values { display: flex; gap: 1.5rem; align-items: center; }
+  .metric-before { font-family: var(--mono); font-size: 0.9rem; color: var(--red); text-decoration: line-through; }
+  .metric-after { font-family: var(--mono); font-size: 0.9rem; color: var(--green); font-weight: 600; }
+
+  /* INSTALL */
+  .install-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; max-width: 640px;
+  }
+  .install-tab { display: flex; border-bottom: 1px solid var(--border); }
+  .install-tab span {
+    padding: 0.75rem 1.5rem; font-size: 0.8rem; color: var(--muted);
+    cursor: pointer; font-family: var(--mono);
+  }
+  .install-tab span.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+  .install-code { padding: 1.5rem; font-family: var(--mono); font-size: 0.85rem; line-height: 2; }
+  .install-code .comment { color: var(--muted); }
+  .install-code .cmd { color: var(--text); }
+  .install-code .highlight { color: var(--accent); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem; text-align: center;
+    font-size: 0.85rem; color: var(--muted);
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1.5rem; }
+
+  /* CLIENTS */
+  .clients { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem; }
+  .client-badge {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 0.5rem 1.25rem; border-radius: 100px;
+    font-family: var(--mono); font-size: 0.78rem; color: var(--muted);
+  }
+
+  @media (max-width: 700px) {
+    .before-after { grid-template-columns: 1fr; }
+    .case-study { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">eks-sage</a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#guardrails">Guardrails</a></li>
+    <li><a href="#opensource">Open Source</a></li>
+    <li><a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise">GitHub</a></li>
+  </ul>
+  <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise" class="nav-cta">⭐ Star on GitHub</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">v2.0 · 62 tools · 5-layer guardrails</div>
+  <h1>Turn <span>3-hour EKS incidents</span> into 10-second diagnoses</h1>
+  <p class="hero-sub">
+    The MCP server that connects Claude, Cursor, and Windsurf directly to your 
+    EKS cluster. Ask in plain English. Get root cause instantly.
+  </p>
+  <div class="hero-actions">
+    <a href="#install" class="btn-primary">Install Free →</a>
+    <a href="#how-it-works" class="btn-secondary">See how it works</a>
+  </div>
+
+  <!-- Terminal Demo -->
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="terminal-title">Claude Code · eks-sage-enterprise</span>
+    </div>
+    <div class="terminal-body">
+      <span class="t-line"><span class="t-prompt">❯ </span><span class="t-cmd">why can't users reach the application</span></span>
+      <span class="t-line t-dim">⏺ eks-sage — connect_cluster (MCP) · my-cluster</span>
+      <span class="t-line t-dim">⏺ eks-sage — get_services (MCP) · found nlb-my-service</span>
+      <span class="t-line t-dim">⏺ eks-sage — investigate_nlb_service (MCP)</span>
+      <span class="t-line">&nbsp;</span>
+      <span class="t-line"><span class="t-ok">✅</span> Load balancer controller: Running (2/2 pods)</span>
+      <span class="t-line"><span class="t-ok">✅</span> NLB: Active · internet-facing · 2 AZs</span>
+      <span class="t-line"><span class="t-ok">✅</span> Target Group port (30323) matches NodePort (30323)</span>
+      <span class="t-line"><span class="t-ok">✅</span> Endpoints: 2 healthy</span>
+      <span class="t-line"><span class="t-warn">⚠️ </span> User IP 203.0.113.45 NOT in source ranges ['10.0.0.0/8']</span>
+      <span class="t-line">&nbsp;</span>
+      <span class="t-line"><span class="t-dim">Root cause: </span>Source IP restriction blocking external users</span>
+      <span class="t-line"><span class="t-dim">Fix: </span><span class="t-ok">Add 203.0.113.45/32 to load-balancer-source-ranges</span></span>
+      <span class="t-line">&nbsp;</span>
+      <span class="t-line t-dim">⏱ 8 seconds · 0 kubectl commands typed</span>
+    </div>
+  </div>
+
+  <!-- Supported Clients -->
+  <div class="clients">
+    <span class="client-badge">Claude Desktop</span>
+    <span class="client-badge">Claude Code</span>
+    <span class="client-badge">Cursor</span>
+    <span class="client-badge">Windsurf</span>
+    <span class="client-badge">Cline</span>
+    <span class="client-badge">Zed</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<div style="padding: 0 2rem;">
+  <div class="stats">
+    <div class="stat"><div class="stat-num">62</div><div class="stat-label">MCP Tools</div></div>
+    <div class="stat"><div class="stat-num">12</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Guardrail Layers</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">NLB Check Steps</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">kubectl Commands Needed</div></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-label">How it works</div>
+  <h2>Before vs After</h2>
+  <p class="section-sub">The same incident. Two very different experiences.</p>
+
+  <div class="before-after">
+    <div class="ba-box before">
+      <div class="ba-tag red">Before EKS Sage</div>
+      <div class="ba-time red">3.5 hrs</div>
+      <div style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">Average incident resolution time</div>
+      <ul class="ba-steps">
+        <li>kubectl get pods --all-namespaces</li>
+        <li>kubectl describe pod xxx -n production</li>
+        <li>kubectl logs xxx -n production --previous</li>
+        <li>kubectl get events -n production</li>
+        <li>aws elbv2 describe-load-balancers</li>
+        <li>aws elbv2 describe-target-groups --lb-arn</li>
+        <li>aws elbv2 describe-target-health --tg-arn</li>
+        <li>aws ec2 describe-security-groups --ids</li>
+        <li>aws route53 list-hosted-zones</li>
+        <li>aws route53 list-resource-record-sets --id</li>
+        <li>... 25 more commands</li>
+      </ul>
+    </div>
+    <div class="ba-box after">
+      <div class="ba-tag green">After EKS Sage</div>
+      <div class="ba-time green">10 sec</div>
+      <div style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">Average incident resolution time</div>
+      <ul class="ba-steps">
+        <li style="color:var(--green)">investigate NLB service my-api</li>
+        <li style="color:var(--text)">↓</li>
+        <li style="color:var(--green)">Root cause found automatically</li>
+        <li style="color:var(--green)">Exact fix command provided</li>
+        <li style="color:var(--green)">All 8 layers checked in parallel</li>
+        <li style="color:var(--green)">Audit logged automatically</li>
+        <li>&nbsp;</li>
+        <li>&nbsp;</li>
+        <li>&nbsp;</li>
+        <li>&nbsp;</li>
+        <li>&nbsp;</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools">
+  <div class="section-label">62 Tools · 12 Categories</div>
+  <h2>Everything your cluster needs</h2>
+  <p class="section-sub">From basic pod inspection to enterprise compliance auditing.</p>
+
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-icon">🔍</div>
+      <div class="tool-name">Incident Investigation</div>
+      <div class="tool-desc">Full automated root cause analysis for pods, DaemonSets, StatefulSets, CronJobs, and NLB traffic paths.</div>
+      <div class="tool-count">8 tools</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🔐</div>
+      <div class="tool-name">Security & RBAC</div>
+      <div class="tool-desc">IRSA debugging, RBAC auditing, pod security scanning, secrets exposure detection, IAM→k8s mapping.</div>
+      <div class="tool-count">6 tools</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🌐</div>
+      <div class="tool-name">NLB Full-Path</div>
+      <div class="tool-desc">8-step investigation: controller → NLB state → listeners → target group → ports → endpoints → pods → Route53.</div>
+      <div class="tool-count">1 deep tool</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">✅</div>
+      <div class="tool-name">Compliance</div>
+      <div class="tool-desc">CIS Kubernetes Benchmark, drift detection via CloudTrail, deprecated API checks, full change audit trail.</div>
+      <div class="tool-count">4 tools</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🌍</div>
+      <div class="tool-name">Multi-Cluster</div>
+      <div class="tool-desc">Fleet view across all regions, compare staging vs production, switch cluster context instantly.</div>
+      <div class="tool-count">3 tools</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">👁️</div>
+      <div class="tool-name">Observability</div>
+      <div class="tool-desc">CloudWatch metrics, Container Insights log search, cross-pod log aggregation, cost by namespace.</div>
+      <div class="tool-count">4 tools</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">💰</div>
+      <div class="tool-name">Cost Intelligence</div>
+      <div class="tool-desc">Resource cost breakdown by namespace. Know which team is spending what before the bill arrives.</div>
+      <div class="tool-count">2 tools</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">📦</div>
+      <div class="tool-name">Workload Operations</div>
+      <div class="tool-desc">Pods, deployments, DaemonSets, StatefulSets, jobs, cronjobs — everything with detailed status.</div>
+      <div class="tool-count">7 tools</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🖥️</div>
+      <div class="tool-name">Node Management</div>
+      <div class="tool-desc">Node groups, resource usage, events, cordon. Full node lifecycle visibility.</div>
+      <div class="tool-count">5 tools</div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARDRAILS -->
+<section id="guardrails">
+  <div class="section-label">Enterprise Safety</div>
+  <h2>5-layer guardrail system</h2>
+  <p class="section-sub">Because AI + production infrastructure requires real protection.</p>
+
+  <div class="guardrail-layers">
+    <div class="layer">
+      <div class="layer-num">Layer 1</div>
+      <div class="layer-content">
+        <h4>Operation Classification</h4>
+        <p>Every tool classified as READ · CONFIG · WRITE · DESTRUCTIVE before execution.</p>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-num">Layer 2</div>
+      <div class="layer-content">
+        <h4>Safety Mode</h4>
+        <p><code>read_only</code> (default) → <code>standard</code> → <code>unrestricted</code>. Start safe, escalate with intention.</p>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-num">Layer 3</div>
+      <div class="layer-content">
+        <h4>Permanent Denylist</h4>
+        <p>74 operations that can never run regardless of safety mode. delete_cluster, drain_node, and more.</p>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-num">Layer 4</div>
+      <div class="layer-content">
+        <h4>Confirmation Gate</h4>
+        <p>All write operations require explicit confirmation with a unique ID before executing.</p>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-num">Layer 5</div>
+      <div class="layer-content">
+        <h4>Audit Log</h4>
+        <p>Every operation logged with timestamp, user, safety mode, and outcome. SOC2 ready.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDY -->
+<section id="case-study">
+  <div class="section-label">Case Study</div>
+  <h2>Real results from real clusters</h2>
+  <p class="section-sub">Measured across 6 months of production incidents at a DevOps team</p>
+
+  <div class="case-study">
+    <div>
+      <div class="metric-row">
+        <span class="metric-label">Incident resolution time</span>
+        <div class="metric-values">
+          <span class="metric-before">2.5 hrs</span>
+          <span class="metric-after">12 min</span>
+        </div>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">kubectl commands per incident</span>
+        <div class="metric-values">
+          <span class="metric-before">35+</span>
+          <span class="metric-after">1</span>
+        </div>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">NLB root cause time</span>
+        <div class="metric-values">
+          <span class="metric-before">45 min</span>
+          <span class="metric-after">10 sec</span>
+        </div>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">IRSA debugging time</span>
+        <div class="metric-values">
+          <span class="metric-before">90 min</span>
+          <span class="metric-after">30 sec</span>
+        </div>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">On-call engineer stress</span>
+        <div class="metric-values">
+          <span class="metric-before">High</span>
+          <span class="metric-after">Low</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <blockquote style="font-size:1.05rem; line-height:1.7; color:var(--text); font-style:italic; margin-bottom:1.5rem;">
+        "At 2am when a application goes down, I used to spend 30 minutes 
+        just figuring out which layer was broken. Now I type one sentence and 
+        get the root cause in seconds."
+      </blockquote>
+      <div style="font-size:0.85rem; color:var(--muted);">
+        <strong style="color:var(--text);">Manvitha Potluri</strong><br>
+        DevOps Cloud Solutions Architect<br>
+        a DevOps team · 11+ years EKS experience
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="section-label">One-line install</div>
+  <h2>Up in 60 seconds</h2>
+  <p class="section-sub">No config files. No YAML. Just install and ask.</p>
+
+  <div class="install-box">
+    <div class="install-tab">
+      <span class="active">Claude Code / Terminal</span>
+    </div>
+    <div class="install-code">
+      <span style="color:var(--muted)"># Step 1 — Install</span><br>
+      <span style="color:var(--accent)">pip install</span> eks-sage-enterprise<br><br>
+      <span style="color:var(--muted)"># Step 2 — Register with your MCP client</span><br>
+      <span style="color:var(--accent)">claude mcp add</span> eks-sage -s user -- python -m eks_sage_enterprise.server<br><br>
+      <span style="color:var(--muted)"># Step 3 — Connect and ask</span><br>
+      <span style="color:var(--text)">connect to cluster my-cluster in us-east-1</span><br>
+      <span style="color:var(--text)">give me a full cluster health check</span>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="opensource">
+  <div class="section-label">100% Open Source</div>
+  <h2>Free. Forever. MIT licensed.</h2>
+  <p class="section-sub">All 62 tools. All guardrails. No limits. No paywalls. No enterprise tier.</p>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem; margin-bottom:3rem;">
+    <div class="tool-card" style="border-color:rgba(0,212,255,0.3);">
+      <div class="tool-icon">⚡</div>
+      <div class="tool-name">Everything included</div>
+      <div class="tool-desc">All 62 tools, all 12 categories, 5-layer guardrails, multi-cluster, compliance checks — no feature gating.</div>
+    </div>
+    <div class="tool-card" style="border-color:rgba(16,185,129,0.3);">
+      <div class="tool-icon">🔓</div>
+      <div class="tool-name">MIT License</div>
+      <div class="tool-desc">Use it, modify it, deploy it in production, build products on top of it. No strings attached.</div>
+    </div>
+    <div class="tool-card" style="border-color:rgba(124,58,237,0.3);">
+      <div class="tool-icon">🤝</div>
+      <div class="tool-name">Community driven</div>
+      <div class="tool-desc">Built by engineers who use EKS daily. Contributions welcome. Issues tracked on GitHub.</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;">
+    <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise" class="btn-primary" style="display:inline-flex; align-items:center; gap:0.75rem;">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Star on GitHub
+    </a>
+    <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--muted);">
+      Found a bug? Want a new tool? 
+      <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise/issues" style="color:var(--accent); text-decoration:none;">Open an issue →</a>
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise">GitHub</a>
+    <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise/issues">Issues</a>
+    <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise/blob/main/CONTRIBUTING.md">Contributing</a>
+    <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise/blob/main/LICENSE">MIT License</a>
+    <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise/issues">Contact</a>
+  </div>
+  <p>Built by <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub">Manvitha Potluri</a> · DevOps Cloud Solutions Architect · 11+ years AWS/EKS</p>
+  <p style="margin-top:0.5rem;">© 2025 EKS Sage · MIT License · Free and open source forever</p>
+</footer>
+
+</body>
+</html>

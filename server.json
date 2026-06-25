@@ -1,0 +1,30 @@
+{
+  "name": "eks-sage-enterprise",
+  "version": "2.0.0",
+  "description": "Enterprise-grade MCP server for Amazon EKS. 62 intelligent tools across 12 categories — cluster management, security, RBAC, NLB investigation, compliance, multi-cluster, and observability.",
+  "author": "Manvitha Potluri",
+  "license": "MIT",
+  "homepage": "https://github.com/ManvithaP-hub/eks-sage-enterprise",
+  "categories": ["eks", "kubernetes", "aws", "k8s", "devops", "security", "compliance"],
+  "tools": 62,
+  "requirements": {
+    "python": ">=3.11",
+    "aws_credentials": true,
+    "kubectl": true,
+    "aws_cli": ">=2.12.0"
+  },
+  "mcp": {
+    "command": "python",
+    "args": ["-m", "eks_sage_enterprise.server"],
+    "env": {
+      "AWS_PROFILE": "default",
+      "AWS_DEFAULT_REGION": "<your-aws-region>",
+      "EKS_SAGE_SAFETY_MODE": "read_only"
+    }
+  },
+  "guardrails": {
+    "default_safety_mode": "read_only",
+    "permanently_blocked_operations": 74,
+    "audit_log": "/tmp/eks-sage-audit.log"
+  }
+}

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eks-sage-enterprise"
+version = "2.0.0"
+description = "Enterprise-grade MCP server for Amazon EKS — 62 intelligent tools across 12 categories"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "Manvitha Potluri", email = "manvithapotluri@gmail.com" }]
+keywords = ["eks", "kubernetes", "mcp", "aws", "k8s", "enterprise", "devops"]
+
+dependencies = [
+    "fastmcp>=2.0.0",
+    "boto3>=1.34.0",
+    "botocore>=1.34.0",
+]
+
+[project.scripts]
+eks-sage-enterprise = "eks_sage_enterprise.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
