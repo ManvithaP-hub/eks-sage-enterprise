@@ -473,59 +473,67 @@
 
 <!-- CASE STUDY -->
 <section id="case-study">
-  <div class="section-label">Case Study</div>
-  <h2>Real results from real clusters</h2>
-  <p class="section-sub">Measured across 6 months of production incidents at a DevOps team</p>
+  <div class="section-label">Before vs After</div>
+  <h2>What changes in practice</h2>
+  <p class="section-sub">Common EKS incident scenarios — measured by tool behavior, not estimated.</p>
 
   <div class="case-study">
     <div>
       <div class="metric-row">
-        <span class="metric-label">Incident resolution time</span>
+        <span class="metric-label">NLB incident — commands needed</span>
         <div class="metric-values">
-          <span class="metric-before">2.5 hrs</span>
-          <span class="metric-after">12 min</span>
+          <span class="metric-before">35+ commands</span>
+          <span class="metric-after">1 sentence</span>
         </div>
       </div>
       <div class="metric-row">
-        <span class="metric-label">kubectl commands per incident</span>
+        <span class="metric-label">NLB root cause identification</span>
         <div class="metric-values">
-          <span class="metric-before">35+</span>
-          <span class="metric-after">1</span>
+          <span class="metric-before">manual, 8 steps</span>
+          <span class="metric-after">automated, 8 sec</span>
         </div>
       </div>
       <div class="metric-row">
-        <span class="metric-label">NLB root cause time</span>
+        <span class="metric-label">IRSA debugging steps</span>
         <div class="metric-values">
-          <span class="metric-before">45 min</span>
-          <span class="metric-after">10 sec</span>
+          <span class="metric-before">6 manual checks</span>
+          <span class="metric-after">1 tool call</span>
         </div>
       </div>
       <div class="metric-row">
-        <span class="metric-label">IRSA debugging time</span>
+        <span class="metric-label">Cluster health overview</span>
         <div class="metric-values">
-          <span class="metric-before">90 min</span>
-          <span class="metric-after">30 sec</span>
+          <span class="metric-before">5+ kubectl commands</span>
+          <span class="metric-after">investigate_cluster_health</span>
         </div>
       </div>
       <div class="metric-row">
-        <span class="metric-label">On-call engineer stress</span>
+        <span class="metric-label">CIS compliance check</span>
         <div class="metric-values">
-          <span class="metric-before">High</span>
-          <span class="metric-after">Low</span>
+          <span class="metric-before">manual audit</span>
+          <span class="metric-after">check compliance cis</span>
         </div>
       </div>
     </div>
     <div>
-      <blockquote style="font-size:1.05rem; line-height:1.7; color:var(--text); font-style:italic; margin-bottom:1.5rem;">
-        "At 2am when a application goes down, I used to spend 30 minutes 
-        just figuring out which layer was broken. Now I type one sentence and 
-        get the root cause in seconds."
-      </blockquote>
-      <div style="font-size:0.85rem; color:var(--muted);">
-        <strong style="color:var(--text);">Manvitha Potluri</strong><br>
-        DevOps Cloud Solutions Architect<br>
-        a DevOps team · 11+ years EKS experience
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:1.5rem;">
+        <div style="font-family:var(--mono); font-size:0.75rem; color:var(--accent); margin-bottom:1rem;">EXAMPLE — NLB INCIDENT</div>
+        <div style="font-family:var(--mono); font-size:0.78rem; line-height:2; color:var(--muted);">
+          <span style="color:var(--accent)">❯ </span>
+          <span style="color:var(--text)">why can't users reach my-api</span><br>
+          <span style="color:var(--green)">⏺ investigate_nlb_service (MCP)</span><br>
+          <span>✅ LB controller running</span><br>
+          <span>✅ NLB active · internet-facing</span><br>
+          <span>✅ Target Group port matches NodePort</span><br>
+          <span style="color:var(--yellow)">⚠️  User IP blocked by source ranges</span><br>
+          <span style="color:var(--green)">Fix: add 203.0.113.45/32 to annotation</span>
+        </div>
       </div>
+      <p style="font-size:0.78rem; color:var(--muted); margin-top:1rem; line-height:1.6;">
+        eks-sage checks 8 layers in sequence — controller health, NLB state, 
+        listeners, target group, port chain, endpoints, pods, and source IP — 
+        and returns the first failure point with a specific fix.
+      </p>
     </div>
   </div>
 </section>
@@ -598,7 +606,7 @@
     <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub/eks-sage-enterprise/issues">Contact</a>
   </div>
   <p>Built by <a target="_blank" rel="noopener" href="https://github.com/ManvithaP-hub">Manvitha Potluri</a> · DevOps Cloud Solutions Architect · 11+ years AWS/EKS</p>
-  <p style="margin-top:0.5rem;">© 2025 EKS Sage · MIT License · Free and open source forever</p>
+  <p style="margin-top:0.5rem;">© 2026 EKS Sage · MIT License · Free and open source forever</p>
 </footer>
 
 </body>
