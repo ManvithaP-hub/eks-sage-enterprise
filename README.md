@@ -1,5 +1,3 @@
-🌐 Website: https://eks-sage.netlify.app
-
 # EKS Sage Enterprise
 
 > **62 MCP tools that turn 3-hour EKS incidents into 10-second diagnoses.**
@@ -158,9 +156,122 @@ eks-sage NEVER:
 | Troubleshooting | 8 | Investigate pod/daemonset/statefulset/cronjob, health check |
 | Storage | 3 | PVs, PVCs, storage investigation |
 | Scaling | 4 | HPA, quotas, PDBs, cost by namespace |
-| Observability | 3 | CloudWatch, Container Insights, log aggregation |
+| Observability | 4 | CloudWatch, Container Insights, log aggregation, cost |
 | Multi-Cluster | 3 | Fleet view, compare, switch context |
 | Compliance | 4 | CIS benchmark, drift, deprecations, audit trail |
+
+---
+
+## What to Ask — All 12 Categories
+
+### 🛡️ Guardrails
+```
+set safety mode to standard
+get safety status
+confirm A1B2C3D4
+show me the audit log
+```
+
+### 🏗️ Cluster Management
+```
+list my EKS clusters in us-east-1
+connect to cluster my-cluster in us-east-1
+what addons are installed on my cluster
+is my cluster ready to upgrade
+describe cluster my-cluster
+```
+
+### 🖥️ Node Management
+```
+show all nodes and their status
+show CPU and memory usage per node
+list my node groups
+get events for node i-0abc123
+```
+
+### 📦 Workload Operations
+```
+show all pods across namespaces
+get logs from pod my-app-xyz in namespace production
+list all deployments
+show all daemonsets
+list statefulsets in namespace data
+show CPU usage per pod
+show jobs and cronjobs
+```
+
+### 🔐 Security & RBAC
+```
+investigate IRSA for service account my-sa in namespace production
+audit RBAC permissions
+check pod security across all namespaces
+scan for secrets exposed as env vars
+who has access to my cluster
+show IAM to Kubernetes permission mapping
+```
+
+### 🌐 Networking & NLB
+```
+show all services and load balancers
+investigate NLB service my-api namespace production user_ip 1.2.3.4
+investigate NLB service my-api user_domain app.example.com
+list all ingresses
+check DNS resolution for my-service in namespace production
+show network policies
+list configmaps and secrets in namespace production
+```
+
+### 🔍 Troubleshooting & Incidents ← Most Used
+```
+give me a full cluster health check
+something is broken — give me a full incident report
+investigate pod my-app-xyz in namespace production
+check for node pressure and OOM evictions
+show all warning events in the cluster
+investigate daemonset aws-node in kube-system
+investigate statefulset my-db in namespace data
+investigate cronjob my-backup in namespace ops
+```
+
+### 💾 Storage
+```
+show all PVs and PVCs
+investigate stuck PVC my-data-pvc in namespace production
+list storage classes
+```
+
+### 📈 Scaling & Cost
+```
+show horizontal pod autoscalers
+show resource quotas per namespace
+show pod disruption budgets
+get cost breakdown by namespace
+```
+
+### 👁️ Observability
+```
+get CloudWatch metrics for my cluster
+search Container Insights for ERROR logs last 2 hours
+get logs from all pods with label app=my-api filter ERROR
+show cost breakdown by namespace
+```
+
+### 🌍 Multi-Cluster
+```
+list all my EKS clusters across us-east-1 and eu-west-1
+compare cluster staging to cluster production
+switch to production cluster in us-west-2
+```
+
+### ✅ Compliance & Drift
+```
+check compliance profile cis
+detect drift in my cluster last 24 hours
+check for deprecated APIs before upgrading
+show all cluster changes in last 24 hours
+```
+
+---
 
 ## 5-Layer Guardrail System
 
