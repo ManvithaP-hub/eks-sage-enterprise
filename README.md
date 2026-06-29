@@ -150,13 +150,13 @@ eks-sage NEVER:
 | Guardrails | 5 | Safety mode, confirmation gate, audit log |
 | Cluster | 5 | List, describe, connect, addons, upgrade insights |
 | Nodes | 5 | Nodegroups, nodes, usage, events, cordon |
-| Workloads | 7 | Pods, logs, deployments, daemonsets, statefulsets |
-| Security | 6 | IRSA, RBAC audit, pod security, secrets, IAM mapping |
-| Networking | 6 | Services, ingresses, DNS check, NLB investigation |
-| Troubleshooting | 8 | Investigate pod/daemonset/statefulset/cronjob, health check |
+| Workloads | 8 | Pods, logs, deployments, daemonsets, statefulsets, jobs, cronjobs |
+| Security | 7 | IRSA, RBAC audit, pod security, secrets, IAM mapping, service accounts |
+| Networking | 7 | Services, ingresses, namespaces, DNS check, NLB investigation |
+| Troubleshooting | 8 | Investigate pod/daemonset/statefulset/cronjob, health check, incident summary |
 | Storage | 3 | PVs, PVCs, storage investigation |
 | Scaling | 4 | HPA, quotas, PDBs, cost by namespace |
-| Observability | 4 | CloudWatch, Container Insights, log aggregation, cost |
+| Observability | 3 | CloudWatch, Container Insights, log aggregation |
 | Multi-Cluster | 3 | Fleet view, compare, switch context |
 | Compliance | 4 | CIS benchmark, drift, deprecations, audit trail |
 
